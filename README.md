@@ -57,14 +57,15 @@ Ejemplo de Seguro de Vida:
 La aplicación sigue una estructura basada en herencia, asegurando una organización clara y extensible.
 
 📌 Clases Principales
-	1.	Seguro (Base de todos los seguros, no se puede instanciar)
-	2.	SeguroHogar
-	3.	SeguroAuto
-	4.	SeguroVida
+
+1. Seguro (Base de todos los seguros, no se puede instanciar)
+2. SeguroHogar
+3. SeguroAuto
+4. SeguroVida
 
 📌 Propiedades y Métodos
 
-✅ Clase Seguro (Abstracta)
+- Clase Seguro (Abstracta)
     * `numPoliza`: Int
     * `dniTitular`: String
     * `importe`: Double (privado)
@@ -73,7 +74,7 @@ La aplicación sigue una estructura basada en herencia, asegurando una organizac
         - `tipoSeguro(): String
         - `serializar(): String (Convierte el objeto a formato TXT)
 
-✅ Clase SeguroHogar
+- Clase SeguroHogar
     * `metrosCuadrados`: Int
     * `valorContenido`: Double
     * `direccion`: String
@@ -85,7 +86,7 @@ Ejemplo de serializar():
 100001;12345678A;500.0;80;150000;Calle Mayor, 12;SeguroHogar
 ```
 
-✅ Clase SeguroAuto
+- Clase SeguroAuto
     * `descripcion`: String (Ejemplo: "Toyota Corolla Azul")
     * `combustible`: String (Gasolina, Diésel, Eléctrico, Híbrido)
     * `tipoAuto`: Enumerado (Coche, Moto, Camion)
