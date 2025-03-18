@@ -37,22 +37,82 @@ id;dniTitular;numPoliza;importe;[datos específicos];tipoSeguro
 Ejemplo de Seguro de Hogar:
 
 ```
-100001;12345678A;101;500.0;80;150000;Calle Mayor, 12;SeguroHogar
+100001;12345678A;500.0;80;150000;Calle Mayor, 12;SeguroHogar
 ```
 
 Ejemplo de Seguro de Auto:
 
 ```
-400001;98765432B;102;700.0;"Toyota Corolla Azul";Gasolina;Turismo;Todo Riesgo;true;1;SeguroAuto
+400001;98765432B;700.0;"Toyota Corolla Azul";Gasolina;Turismo;Todo Riesgo;true;1;SeguroAuto
 ```
 
 Ejemplo de Seguro de Vida:
 
 ```
-800001;87654321C;103;300.0;1985-05-12;Medio;100000;SeguroVida
+800001;87654321C;300.0;1985-05-12;Medio;100000;SeguroVida
 ```
 
-## 3. Generación del id de los seguros
+## 3. Jerarquía de Clases
+
+La aplicación sigue una estructura basada en herencia, asegurando una organización clara y extensible.
+
+📌 Clases Principales
+	1.	Seguro (Base de todos los seguros, no se puede instanciar)
+	2.	SeguroHogar
+	3.	SeguroAuto
+	4.	SeguroVida
+
+📌 Propiedades y Métodos
+
+✅ Clase Seguro (Abstracta)
+    * `numPoliza`: Int
+    * `dniTitular`: String
+    * `importe`: Double (privado)
+    * Métodos abstractos:
+        - `calcularImporteAnioSiguiente(interes: Double): Double
+        - `tipoSeguro(): String
+        - `serializar(): String (Convierte el objeto a formato TXT)
+
+✅ Clase SeguroHogar
+    * `metrosCuadrados`: Int
+    * `valorContenido`: Double
+    * `direccion`: String
+    * `calcularImporteAnioSiguiente(interes: Double)`: Aplica el porcentaje proporcionado.
+
+Ejemplo de serializar():
+
+```
+100001;12345678A;500.0;80;150000;Calle Mayor, 12;SeguroHogar
+```
+
+✅ Clase SeguroAuto
+    * `descripcion`: String (Ejemplo: "Toyota Corolla Azul")
+    * `combustible`: String (Gasolina, Diésel, Eléctrico, Híbrido)
+    * `tipoAuto`: Enumerado (Coche, Moto, Camion)
+    * `tipoCobertura`: String (Terceros, Todo Riesgo, etc.)
+    * `asistenciaCarretera`: Boolean
+    * `numPartes`: Int
+    * `calcularImporteAnioSiguiente(interes: Double)`: Aumenta un 2% por cada parte el interés pasado como argumento, si hubo partes, sino solo usa el interés dado.
+
+Ejemplo de serializar():
+
+```
+400001;98765432B;700.0;"Toyota Corolla Azul";Gasolina;Turismo;Todo Riesgo;true;1;SeguroAuto
+```
+
+✅ Clase SeguroVida
+    * `fechaNac`: String
+    * `nivelRiesgo`: Enumerado (Bajo, Medio, Alto)
+    * `indemnizacion`: Double
+    * `calcularImporteAnioSiguiente(interes: Double)`: Aumenta según el nivel de riesgo (Bajo 2%, Medio 5%, Alto 10%).
+
+Ejemplo de serializar():
+
+```
+800001;87654321C;300.0;1985-05-12;Medio;100000;SeguroVida
+```
+
+## 4. Generación del id de los seguros
 
 Los ids de los seguros se generarán automáticamente:
 
@@ -60,7 +120,7 @@ Los ids de los seguros se generarán automáticamente:
 - Seguros de Auto → desde 400000.
 - Seguros de Vida → desde 800000.
 
-## 4. Validación de Datos
+## 5. Validación de Datos
 
 - Cada campo será validado antes de continuar.
 - Métodos estáticos en Seguro y Alquiler manejarán las validaciones.
@@ -81,7 +141,7 @@ Si el usuario ingresa un dato incorrecto:
 
 DNI inválido. Inténtelo nuevamente o escriba "CANCELAR" para salir.
 
-## 5. Menús y Permisos
+## 6. Menús y Permisos
 
 Los usuarios verán opciones según su perfil.
 
@@ -132,7 +192,20 @@ Los usuarios verán opciones según su perfil.
 2. Salir
 ```
 
-## 6. Mapa de Creación de Seguros
+## 7. Modo de Ejecución
+
+Al iniciar, después de validar al usuario, se realiza la pregunta:
+
+```
+Seleccione el modo de ejecución:
+1. SIMULACIÓN (solo en memoria)
+2. ALMACENAMIENTO (usar ficheros)
+```
+
+* SIMULACIÓN: Todos los datos se manejan en memoria.
+* ALMACENAMIENTO: Se guardan y cargan desde Seguros.txt.
+
+## 8. Mapa de Creación de Seguros
 
 El mapa de funciones se usará para instanciar dinámicamente los seguros cuando se carguen desde el fichero Seguros.txt.
 
@@ -159,7 +232,7 @@ val mapaSeguros: Map<String, (List<String>) -> Seguro> = mapOf(
 )
 ```
 
-## 7. RepositorioSegurosFicheros (Lectura y Escritura de Seguros en Fichero)
+## 9. RepositorioSegurosFicheros (Lectura y Escritura de Seguros en Fichero)
 
 ```kotlin
 class RepositorioSegurosFicheros(private val archivo: String, private val mapaSeguros: Map<String, (List<String>) -> Seguro>) {
@@ -191,7 +264,7 @@ class RepositorioSegurosFicheros(private val archivo: String, private val mapaSe
 ```
 
 
-## 8. main() con inicialización del repositorio
+## 10. main() con inicialización del repositorio
 
 ```
 fun main() {
@@ -211,15 +284,3 @@ fun main() {
 }
 ```
 
-## 9. Modo de Ejecución
-
-Al iniciar, después de validar al usuario, se realiza la pregunta:
-
-```
-Seleccione el modo de ejecución:
-1. SIMULACIÓN (solo en memoria)
-2. ALMACENAMIENTO (usar ficheros)
-```
-
-   * SIMULACIÓN: Todos los datos se manejan en memoria.
-   * ALMACENAMIENTO: Se guardan y cargan desde Seguros.txt.
