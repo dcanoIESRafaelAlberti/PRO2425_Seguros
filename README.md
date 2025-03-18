@@ -136,6 +136,7 @@ Los usuarios verán opciones según su perfil.
 
 El mapa de funciones se usará para instanciar dinámicamente los seguros cuando se carguen desde el fichero Seguros.txt.
 
+```kotlin
 val mapaSeguros: Map<String, (List<String>) -> Seguro> = mapOf(
     "SeguroHogar" to { datos ->
         SeguroHogar(
@@ -156,10 +157,11 @@ val mapaSeguros: Map<String, (List<String>) -> Seguro> = mapOf(
         )
     }
 )
+```
 
 ## 7. RepositorioSegurosFicheros (Lectura y Escritura de Seguros en Fichero)
 
-```
+```kotlin
 class RepositorioSegurosFicheros(private val archivo: String, private val mapaSeguros: Map<String, (List<String>) -> Seguro>) {
 
     // Guardar un seguro en el fichero
