@@ -101,7 +101,7 @@ Ejemplo de serializar():
 400001;98765432B;700.0;"Toyota Corolla Azul";Gasolina;Turismo;Todo Riesgo;true;1;SeguroAuto
 ```
 
-✅ Clase SeguroVida
+- Clase SeguroVida
     * `fechaNac`: String
     * `nivelRiesgo`: Enumerado (Bajo, Medio, Alto)
     * `indemnizacion`: Double
