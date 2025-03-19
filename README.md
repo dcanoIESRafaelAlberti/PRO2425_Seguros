@@ -70,15 +70,15 @@ La aplicación sigue una estructura basada en herencia, asegurando una organizac
     * `dniTitular`: String
     * `importe`: Double (privado)
     * Métodos abstractos:
-        - `calcularImporteAnioSiguiente(interes: Double): Double
-        - `tipoSeguro(): String
-        - `serializar(): String (Convierte el objeto a formato TXT)
+        - `calcularImporteAnioSiguiente(interes: Double): Double`
+        - `tipoSeguro(): String`
+        - `serializar(): String` (Convierte el objeto a formato TXT)
 
 - Clase SeguroHogar
     * `metrosCuadrados`: Int
     * `valorContenido`: Double
     * `direccion`: String
-    * `calcularImporteAnioSiguiente(interes: Double)`: Aplica el porcentaje proporcionado.
+    * `calcularImporteAnioSiguiente(interes: Double)`: Double (Aplica el porcentaje proporcionado al importe para generar la predicción del importe del siguiente año).
 
 Ejemplo de serializar():
 
