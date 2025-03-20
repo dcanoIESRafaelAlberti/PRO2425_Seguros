@@ -30,7 +30,7 @@ Debéis crear los siguientes paquetes:
 ### **2. `model` (Modelo de Datos)**
 Este paquete contiene **todas las clases y enumeraciones** que definen los datos que maneja la aplicación.
 
-#### **Enumeraciones**
+#### **ENUMERACIONES**
 
 ##### **`Perfil`**: Define los roles de usuario.
   
@@ -64,13 +64,13 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
    - Métodos estáticos: `getRiesgo(valor: String): Riesgo` *(Retorna el valor de la enumeración correspondiente a la cadena de caracteres que se pasa por argumento o MEDIO si no existe. Por ejemplo: getRiesgo("bajo") retornaría BAJO)*
 
-#### **Interfaces**
+#### **INTERFACES**
 
 ##### **`IExportable`**
 
 - Contiene un único método `serializar(): String`
 
-#### **Clases**
+#### **CLASES**
 
 ##### **`Usuario`**
 
@@ -109,7 +109,7 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
   - `hashCode(): Int`: Cómo `numPoliza`será único por cada seguro, retornar el valor de hashCode de un seguro en base solo a la dicha propiedad *(sin utilizar ningún número primo, ni más propiedades)*.
   - `equals(other: Any?): Boolean`: Utilizad igual que en el anterior método, solo la propiedad `numPoliza` para su comparación *(por supuesto, hacedlo bien, antes debéis realizar la comparación por referencia y verificar también si se trata de un `Seguro`)*
 
-##### **Clases que heredan de `Seguro`**
+##### **CLASES QUE HEREDAN DE `Seguro`**
 
 ##### **`SeguroHogar`**
 
