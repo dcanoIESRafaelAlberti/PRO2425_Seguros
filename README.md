@@ -2,9 +2,13 @@
 
 **Práctica: Gestión de Seguros con Ficheros TXT**
 
+## [Guía de Implementación Paso a Paso](Guia.md) ***(Última actualización 20/03/2025 20:15)***
+
 ## 1. Introducción
 
-Esta aplicación permite gestionar seguros y alquileres aplicando:
+En esta práctica vamos a construir una aplicación en **Kotlin** donde aplicaremos **POO (Programación Orientada a Objetos)**, el **principio SOLID**, y trabajaremos con **ficheros** para almacenar información de manera persistente.
+
+La aplicación servirá para gestionar **seguros** de diferentes tipos y también manejará la **autenticación de usuarios**. Vamos a dividir el código en **paquetes organizados**, cada uno con una función específica para que el proyecto esté bien estructurado y sea fácil de mantener.
 
 - POO y principios SOLID.
 - Almacenamiento en ficheros TXT con datos separados por ;.
