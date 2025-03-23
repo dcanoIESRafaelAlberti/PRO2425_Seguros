@@ -11,6 +11,8 @@
 ***NOTA (20/03/2025 20:15)*** - Por ahora os dejo explicados y guiados casi al 100% los apartados 1, 2 y 6, a menos que se me ocurra algo más o vea algún problema que debemos solucionar.
 Cuando tenga otro rato, terminaré mi versión y os subiré el resto de apartados, actualizando esta información.
 
+***NOTA (23/03/2025 17:25)*** - Actualizados los apartados 2 y 3 (model y data). **OJO con las modificaciones en el apartado 2 (revisadlo)**, 
+
 ---
 
 Aquí tenéis un desglose del proyecto con **indicaciones detalladas** sobre qué debe hacer cada paquete y cómo implementar cada clase.
@@ -68,7 +70,7 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 ##### **`IExportable`**
 
-- Contiene un único método `serializar(): String`
+- Contiene un único método `serializar(separador: String = ";"): String`
 
 #### **CLASES**
 
@@ -76,17 +78,16 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 - Debe implementar un contrato como una clase de tipo `IExportable`.
 
-- **Atributos:** `nombre`, `clave` y `perfil`. El nombre de usuario debe ser único.
+- **Atributos:** `nombre`, `clave` y `perfil`. El nombre de usuario debe ser único. Todos los atributos serán públicos, excepto el `set` de `clave` que solo se podrá modificar dentro de la clase.
 
 - **Propiedades y métodos estácticos:**
   - `crearUsuario(datos: List<String>): Usuario`: Retorna una instancia de `Usuario`. El parámetro que recibe, `datos`, contiene el valor de cada propiedad en orden y deben ser convertidos según el tipo de la propiedad si es necesario. Muy atentos a controlar su llamada para evitar EXCEPCIONES por conversiones erróneas *(aunque si almacenamos bien la info no debería ocurir, pero un buen programador/a lo controla SIEMPRE)*
 
 - **Métodos:**
-  - `verificarClave(claveEncriptada: String): Boolean`: Retorna si la clave es la misma que la almacenada en el usuario.
   - `cambiarClave(nuevaClaveEncriptada: String)`: Actualiza la clave del usuario *(este método va a actualizar la clave del usuario directamente, pero en el servicio que gestiona los usuarios debe solicitar la antigua clave, verificarla y pedir la nueva)*.
 
 - **Métodos que sobreescribe:**
-  - `serializar(): String`: Retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;`.
+  - `serializar(separador: String): String`: Retornar una cadena de caracteres con los valores de los atributos de la clase separados por el valor indicado en `separador`.
 
 ##### **`Seguro`**
 
@@ -94,14 +95,11 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 - Debe implementar un contrato como una clase de tipo `IExportable`.
 
-- **Atributos:** `numPoliza` *(única por seguro)*, `dniTitular`, `importe`. Los dos primeros no serán accesibles desde fuera de la clase y el último solo será accesible desde la clase y las clases que la extiendan.
+- **Atributos:** `numPoliza` *(pública y única por seguro)*, `dniTitular` *(solo accesible en su propia clase)*, `importe` *(solo accesible desde su propia clase y las clases que la extienden)*.
 
 - **Métodos abstractos:**
   - `calcularImporteAnioSiguiente(interes: Double): Double`
   - `tipoSeguro(): String`
-
-- **Métodos:**
-  - `comprobarNumPoliza(numPoliza: Int): Boolean`: Retorna `true/false` indicando si el parámetro que hemos pasado como argumento al método es igual o no al atributo `numPoliza` de la instancia.
 
 - **Métodos que sobreescribe:**
   - `serializar(): String`: Retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;` *(por ejemplo: "100001;44027777K;327.40")*
@@ -120,8 +118,9 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
   - Segundo constructor secundario: Lo usaremos para crear una póliza ya existente *(es decir, cuando recuperamos los seguros desde la persistencia de datos)*. Este segundo constructor no se podrá llamar desde fuera de la clase.
 
 - **Propiedades y métodos estácticos:**
-  - `numPolizasAuto: Int`: Nos ayuda a generar `numPoliza` de los nuevos seguros. No será accesible desde fuera de la clase.
+  - `numPolizasHogar: Int`: Nos ayuda a generar `numPoliza` de los nuevos seguros. No será accesible desde fuera de la clase.
   - `crearSeguro(datos: List<String>): SeguroHogar`: Retorna una instancia de `SeguroHogar`. El parámetro que recibe, `datos`, contiene el valor de cada propiedad en orden y deben ser convertidos según el tipo de la propiedad si es necesario. Muy atentos a controlar su llamada para evitar EXCEPCIONES por conversiones erróneas *(aunque si almacenamos bien la info no debería ocurir, pero un buen programador/a lo controla SIEMPRE)*
+  - Yo crearía también dos constantes: PORCENTAJE_INCREMENTO_ANIOS = 0.02 y CICLO_ANIOS_INCREMENTO = 5.
 
 - **Métodos que sobreescribe:**
   - `calcularImporteAnioSiguiente()`: Retornar el importe del año siguiente basándose en el interés que se pasa por parámetro, sumándole un interés residual de 0.02% por cada 5 años de antiguedad del hogar *(Ej: 4.77 años de antiguedad no incrementa, pero 23,07 sumará al interés el valor de 4 x 0.02 = 0.08)*.
@@ -140,6 +139,7 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 - **Propiedades y métodos estácticos:**
   - `numPolizasAuto: Int`: Nos ayuda a generar `numPoliza` de los nuevos seguros. No será accesible desde fuera de la clase.
   - `crearSeguro(datos: List<String>): SeguroAuto`: Retorna una instancia de `SeguroAuto`. El parámetro que recibe, `datos`, contiene el valor de cada propiedad en orden y deben ser convertidos según el tipo de la propiedad si es necesario.
+  - Yo crearía una constante PORCENTAJE_INCREMENTO_PARTES = 2.
 
 - **Métodos que sobreescribe:**
   - `calcularImporteAnioSiguiente()`: Retornar el importe del año siguiente basándose en el interés que se pasa por parámetro, sumándole un interés residual del 2% por cada parte declarado.
@@ -156,7 +156,7 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
   - Segundo constructor secundario: Lo usaremos para crear una póliza ya existente. Este segundo constructor no se podrá llamar desde fuera de la clase.
 
 - **Propiedades y métodos estácticos:**
-  - `numPolizasAuto: Int`: Nos ayuda a generar `numPoliza` de los nuevos seguros. No será accesible desde fuera de la clase.
+  - `numPolizasVida: Int`: Nos ayuda a generar `numPoliza` de los nuevos seguros. No será accesible desde fuera de la clase.
   - `crearSeguro(datos: List<String>): SeguroVida`: Retorna una instancia de `SeguroVida`. El parámetro que recibe, `datos`, contiene el valor de cada propiedad en orden y deben ser convertidos según el tipo de la propiedad si es necesario.
 
 - **Métodos que sobreescribe:**
@@ -165,13 +165,63 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
   - `serializar(): String`: Modificar el comportamiento de este método heredado, para retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;`.
   - `toString(): String`: Retornar la información del seguro de auto con un formato similar al del seguro de hogar.
 
+##### **VALIDACIONES**
+
+Las realizaremos todas en una clase que gestionará el menú de la app, fuera de las clases del modelo, para controlar la introducción de cada dato justo después de su introducción.
+
 ---
 
 ### **3. `data` (Repositorios y Persistencia)**
 
+Este paquete será el encargado de almacenar y recuperar datos, tanto en memoria como desde archivos. Aquí gestionaremos todo lo relacionado con la persistencia de usuarios y seguros.
+
 #### **Interfaces:**
 
+##### `IRepoUsuarios`  
+Define las operaciones básicas que deben poder realizarse con usuarios, como añadir, buscar, eliminar o listar.
+
+- **¿Para qué sirve?**  
+  Para acceder, modificar y consultar los usuarios del sistema.
+
+- **¿Quién lo usará?**  
+  Lo utilizará la clase `GestorUsuarios` (de `service`) para gestionar las operaciones de usuario.
+
+- **¿Qué deberías implementar?**  
+  Métodos como:
+  - Agregar un usuario si no existe otro con el mismo nombre.
+  - Buscar un usuario por su nombre.
+  - Eliminarlo por nombre o por objeto.
+  - Cambiar su clave.
+  - Obtener todos los usuarios o filtrarlos por perfil.
+
+```kotlin
+interface IRepoUsuarios {
+    fun agregar(usuario: Usuario): Boolean
+    fun buscar(nombreUsuario: String): Usuario?
+    fun eliminar(usuario: Usuario): Boolean
+    fun eliminar(nombreUsuario: String): Boolean
+    fun obtenerTodos(): List<Usuario>
+    fun obtener(perfil: Perfil): List<Usuario>
+    fun cambiarClave(usuario: Usuario, nuevaClave: String): Boolean
+}
 ```
+
+##### `IRepoSeguros`  
+Define las operaciones con los seguros: añadir, buscar, eliminar y listar por tipo.
+
+- **¿Para qué sirve?**  
+  Para tener acceso a los seguros y sus datos durante la ejecución del programa.
+
+- **¿Quién lo usará?**  
+  Lo utilizará la clase `GestorSeguros` (de `service`).
+
+- **¿Qué deberías implementar?**  
+  - Añadir un seguro.
+  - Buscarlo por número de póliza.
+  - Eliminarlo por objeto o número.
+  - Obtener todos o por tipo (`SeguroHogar`, `SeguroAuto`, `SeguroVida`).
+
+```kotlin
 interface IRepoSeguros {
     fun agregar(seguro: Seguro): Boolean
     fun buscar(numPoliza: Int): Seguro?
@@ -182,21 +232,209 @@ interface IRepoSeguros {
 }
 ```
 
+##### `ICargarUsuariosIniciales`
+Define la operación necesaria para cargar los usuarios desde el fichero de texto al iniciar la aplicación.
+
+- **¿Para qué sirve?**  
+  Para cargar los datos de usuarios desde un fichero al iniciar el programa, si se elige el modo de persistencia.
+
+- **¿Quién lo usará?**  
+  Será llamada desde `Main.kt` si el usuario elige trabajar en modo persistente.
+
+- **¿Qué deberías hacer?**  
+  Leer el fichero y crear objetos `Usuario` a partir de cada línea del fichero. Se debe comprobar que el fichero existe y tiene contenido.
+
 ```kotlin
-interface IRepoUsuarios {
+interface ICargarUsuariosIniciales {
+    fun cargarUsuarios(): Boolean
+}
+```
+
+##### `ICargarSegurosIniciales`
+Define la operación necesaria para cargar los seguros desde el fichero de texto al iniciar la aplicación.
+
+- **¿Para qué sirve?**  
+  Para cargar los seguros al inicio desde el fichero correspondiente.
+
+- **¿Quién lo usará?**  
+  También será usada en el `Main.kt`, cuando se cargan los datos desde almacenamiento.
+
+- **¿Qué debes tener en cuenta?**  
+  Cada línea del fichero de seguros indica el tipo de seguro al final de la línea. Usa ese dato para saber qué tipo de objeto seguro debes construir. Para eso, se proporciona un mapa que relaciona el tipo (`"SeguroHogar"`, `"SeguroAuto"`, etc.) con una función constructora.
+
+```kotlin
+interface ICargarSegurosIniciales {
+    fun cargarSeguros(mapa: Map<String, (List<String>) -> Seguro>): Boolean
 }
 ```
 
 #### **Clases:**
 
-##### **RepoSegurosMem:**
+##### `RepoUsuariosMem`
+Esta clase implementa la interfaz `IRepoUsuarios` y almacena los usuarios en una lista mutable. Se utiliza en modo simulación *(sin persistencia)*, por lo que todos los cambios son temporales.
 
-##### **RepoSegurosFich:**
+- **¿Qué hace?**  
+  Gestiona los usuarios en una lista en memoria (no guarda en ficheros).
 
-##### **RepoUsuariosMem:**
+- **¿Cuándo se usa?**  
+  Cuando el programa se ejecuta en modo "simulación".
 
-##### **RepoUsuariosFich:**
+- **¿Qué debes implementar?**  
+  Los métodos definidos por `IRepoUsuarios`, usando una lista mutable interna.
 
+- **¿Cómo hacer cada método?**
+
+   * `agregar(usuario: Usuario): Boolean`
+      Antes de añadirlo, comprueba si ya existe un usuario con el mismo nombre usando `buscar(...)`. Así evitaras duplicados. El nombre de usuario debe ser único.
+
+   * `buscar(nombreUsuario: String): Usuario?`
+      Utiliza la función `find` sobre la lista.
+
+   * `eliminar(usuario: Usuario): Boolean`
+      Usa `remove(...)` sobre la lista.
+
+   * `eliminar(nombreUsuario: String): Boolean`
+      Llama a `buscar(...)` y, si existe, usa la función anterior. Por si es necesario eliminar usuarios indicando su nombre.
+
+   * `obtenerTodos(): List<Usuario>`
+      Simplemente retorna la lista.
+
+   * `obtener(perfil: Perfil): List<Usuario>`
+      Usa `filter(...)` para obtener usuarios según su perfil *(Admin, Gestión, Consulta)*.
+
+   * `cambiarClave(usuario: Usuario, nuevaClave: String): Boolean`
+      Llama a `cambiarClave(...)` del usuario.
+
+##### `RepoUsuariosFich`
+Esta clase extiende `RepoUsuariosMem`, por lo que reutiliza toda la lógica de gestión en memoria, pero **añade persistencia en fichero** usando un objeto de tipo `IUtilFicheros`.  
+
+Recibirá como argumentos de entrada la ruta del archivo (String) y una instancia del tipo IUtilFicheros *(aquí estamos usando DIP)*.
+
+- **¿Qué hace?**  
+  Hereda de `RepoUsuariosMem`, pero además **escribe y lee en un archivo `.txt`**. También implementa el contrato con `ICargarUsuariosIniciales`.
+
+- **¿Cuándo se usa?**  
+  Cuando el programa se ejecuta en modo persistente.
+
+- **¿Qué responsabilidades tiene?**
+  - Añadir y eliminar usuarios también en el fichero, es decir, que sobrrescribe los métodos agregar y eliminar. Os pongo un ejemplo:
+
+    ```kotlin
+    override fun eliminar(usuario: Usuario): Boolean {
+        if (fich.escribirArchivo(rutaArchivo, usuarios.filter { it != usuario })) {
+            return super.eliminar(usuario)
+        }
+        return false
+    }
+    ```
+
+  - Actualizar el fichero si se cambia la clave de un usuario.
+  - Cargar usuarios al inicio si existe el fichero *(ICargarSegurosIniciales)*
+
+- **¿Cómo hacer cada método?**
+
+   * `agregar(usuario: Usuario): Boolean` *(Debe mantener sincronizados el fichero y la lista de usuarios)*
+      1. Comprueba que no existe ya, si es así retorna false.
+      2. Si no existe, lo guarda en el fichero *(usa `agregarLinea`)*.
+      3. Solo si el guardado en fichero es exitoso, lo añade a la lista en memoria.
+
+   * `eliminar(usuario: Usuario): Boolean` *(Debe evitar inconsistencias entre memoria y almacenamiento persistente)*
+      1. Filtra la lista para excluir al usuario eliminado.
+      2. Sobrescribe el fichero con el contenido actualizado *(`escribirArchivo`)*.
+      3. Si la escritura fue correcta, elimina el usuario de la lista.
+
+   * `cargarUsuarios(): Boolean` *(Es imprescindible para tener en memoria los usuarios guardados en ejecuciones anteriores)*
+      1. Lee el archivo línea a línea.
+      2. Divide cada línea por `;` para obtener los campos.
+      3. Usa la función `Usuario.crearUsuario(datos)` para crear la instancia.
+      4. Añade los usuarios a la lista.
+
+##### `RepoSegurosMem`
+Esta clase implementa la interfaz `IRepoSeguros` y almacena los seguros en una lista mutable. Se utiliza en modo simulación *(sin persistencia)*, por lo que todos los cambios son temporales.
+
+- **¿Qué hace?**  
+  Gestiona seguros usando una lista en memoria.
+
+- **¿Cuándo se usa?**  
+  Igual que `RepoUsuariosMem`, en modo simulación.
+
+- **¿Qué responsabilidades tiene?**  
+  Implementar los métodos definidos por `IRepoSeguros`.
+
+- **¿Cómo hacer cada método?**
+
+   * `agregar(seguro: Seguro): Boolean`
+      Llama a `seguros.add(seguro)`.
+
+   * `buscar(numPoliza: Int): Seguro?`
+      Recorre la lista y devuelve el primer seguro que cumpla la condición usando `find { ... }`.
+
+   * `eliminar(seguro: Seguro): Boolean`
+      Llama a `seguros.remove(seguro)`.
+
+   * `eliminar(numPoliza: Int): Boolean`
+      1. Llama a `buscar(numPoliza)` para encontrar el seguro.
+      2. Si lo encuentra, llama al método `eliminar(seguro)`.
+
+   * `obtenerTodos(): List<Seguro>`
+      Retorna directamente la lista `seguros`.
+
+   * `obtener(tipoSeguro: String): List<Seguro>`
+      Usa `filter` comparando con `tipoSeguro() de cada seguro`.
+
+##### `RepoSegurosFich`
+Esta clase hereda de `RepoSegurosMem`, pero se encarga también de guardar los datos en fichero de forma persistente. Implementa la interfaz `ICargarSegurosIniciales`.
+
+- **¿Qué hace?**  
+  Extiende `RepoSegurosMem` y añade escritura y lectura de seguros en un fichero.
+
+- **¿Qué añade respecto a `RepoSegurosMem`?**
+  - Guarda cada seguro en el archivo cada vez que se agrega.
+  - Elimina del fichero cuando se borra un seguro.
+  - Permite cargar los seguros al inicio del programa (`ICargarSegurosIniciales`).
+  - **Importante:** al cargar los seguros, también debe actualizar los contadores de cada tipo *(`SeguroHogar`, `SeguroAuto`, etc.)*, para no generar duplicados en los números de póliza.
+
+- **¿Cómo hacer cada método?**
+
+   * `agregar(seguro: Seguro): Boolean`
+      1. Llama a `fich.agregarLinea(...)` para añadirlo al fichero.
+      2. Si se guarda correctamente, llama a `super.agregar(...)`.
+
+   * `eliminar(seguro: Seguro): Boolean`
+      1. Genera una nueva lista sin el seguro a eliminar.
+      2. Llama a `fich.escribirArchivo(...)` con la nueva lista.
+      3. Si se actualiza el fichero, llama a `super.eliminar(...)`.
+
+   * `cargarSeguros(mapa: Map<String, (List<String>) -> Seguro>): Boolean`
+      1. Usa `fich.leerSeguros(...)`, que recorre el fichero línea por línea.
+      2. Cada línea se transforma en un seguro usando el mapa de funciones de creación por tipo.
+      3. Se actualiza la lista `seguros` y se llama a `actualizarContadores(...)`.
+
+   * `actualizarContadores(seguros: List<Seguro>)`
+      1. Filtra los seguros por tipo usando `tipoSeguro()`.
+      2. Calcula el mayor número de póliza de cada tipo.
+      3. Asigna ese valor al contador correspondiente del `companion object` de cada clase.
+      4. Es esencial para que no se generen números de póliza repetidos al contratar nuevos seguros. Este último método os lo proporciono yo, para que lo uséis en `cargarSeguros`.
+
+   ```kotlin
+    private fun actualizarContadores(seguros: List<Seguro>) {
+        // Actualizar los contadores de polizas del companion object según el tipo de seguro
+        val maxHogar = seguros.filter { it.tipoSeguro() == "SeguroHogar" }.maxOfOrNull { it.numPoliza }
+        val maxAuto = seguros.filter { it.tipoSeguro() == "SeguroAuto" }.maxOfOrNull { it.numPoliza }
+        val maxVida = seguros.filter { it.tipoSeguro() == "SeguroVida" }.maxOfOrNull { it.numPoliza }
+
+        if (maxHogar != null) SeguroHogar.numPolizasHogar = maxHogar
+        if (maxAuto != null) SeguroAuto.numPolizasAuto = maxAuto
+        if (maxVida != null) SeguroVida.numPolizasVida = maxVida
+    }
+   ```
+
+##### Recomendaciones finales
+
+- Usa clases abiertas (`open class`) cuando vayas a heredarlas.
+- Separa bien la lógica en memoria y la lógica de ficheros.
+- Usa `serializar()` y `crearXxx()` en cada tipo de seguro para guardar y leer los datos fácilmente.
+- No mezcles la lógica de presentación ni la de negocio dentro de estos repositorios.
 
 ---
 
