@@ -117,7 +117,7 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 - **Atributos específicos:** `metrosCuadrados`, `valorContenido`, `direccion`, `anioConstruccion`. No serán accesibles desde fuera de la clase.
 
 - **Constructores:** Esta clase no implementa un constructor primaro. En su lugar, tiene dos constructores secundarios, los cuales llaman al constructor de la **clase padre `Seguro`** con `super(...)`.
-  - Primer constructor secundario: Lo usaremos en la Contratacíon de un **NUEVO** seguro *(genera un número de póliza automáticamente, gracias a una propiedad privada numPolizasAuto que comienza en el número 100000)*
+  - Primer constructor secundario: Lo usaremos en la Contratacíon de un **NUEVO** seguro *(genera un número de póliza automáticamente, gracias a una propiedad privada numPolizasHogar que comienza en el número 100000)*
   - Segundo constructor secundario: Lo usaremos para crear una póliza ya existente *(es decir, cuando recuperamos los seguros desde la persistencia de datos)*. Este segundo constructor no se podrá llamar desde fuera de la clase.
 
 - **Propiedades y métodos estácticos:**
@@ -155,7 +155,7 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 - **Atributos específicos:** `fechaNac`, `nivelRiesgo`, `indemnizacion`. Usad el tipo de datos `LocalDate` para `fechaNac`. No serán accesibles desde fuera de la clase.
 
 - **Constructores:** Esta clase no implementa un constructor primaro. En su lugar, tiene dos constructores secundarios, los cuales llaman al constructor de la **clase padre `Seguro`** con `super(...)`.
-  - Primer constructor secundario: Lo usaremos en la Contratacíon de un **NUEVO** seguro *(genera un número de póliza automáticamente, gracias a una propiedad privada numPolizasAuto que comienza en el número 800000)*
+  - Primer constructor secundario: Lo usaremos en la Contratacíon de un **NUEVO** seguro *(genera un número de póliza automáticamente, gracias a una propiedad privada numPolizasVida que comienza en el número 800000)*
   - Segundo constructor secundario: Lo usaremos para crear una póliza ya existente. Este segundo constructor no se podrá llamar desde fuera de la clase.
 
 - **Propiedades y métodos estácticos:**
