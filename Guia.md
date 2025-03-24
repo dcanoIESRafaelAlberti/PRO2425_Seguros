@@ -6,12 +6,15 @@
 4. **Crea los servicios en `service`**, aplicando inyección de dependencias.
 5. **Diseña la UI en `ui`** con una implementación en consola.
 6. **Gestiona los ficheros en `utils`** y usa la interfaz definida para mantener el código desacoplado.
-7. **Implementa el `Main.kt`** para iniciar el programa, gestionar el menú y las dependencias.
+7. **Desarrolla las clases que controlan el flujo de la aplicación en `app`**.
+8. **Implementa el `Main.kt`** para iniciar el programa, gestionar el menú y las dependencias.
 
 ***NOTA (20/03/2025 20:15)*** - Por ahora os dejo explicados y guiados casi al 100% los apartados 1, 2 y 6, a menos que se me ocurra algo más o vea algún problema que debemos solucionar.
 Cuando tenga otro rato, terminaré mi versión y os subiré el resto de apartados, actualizando esta información.
 
-***NOTA (23/03/2025 17:25)*** - Actualizados los apartados 2 y 3 (model y data). **OJO con las modificaciones en el apartado 2 (revisadlo)**, 
+***NOTA (23/03/2025 17:25)*** - Actualizados los apartados 2 y 3 (model y data). **OJO con las modificaciones en el apartado 2 (revisadlo)**.
+
+***NOTA (24/03/2025 10:15)*** - Actualizados los apartados 4 y 5 (service y ui).
 
 ---
 
@@ -441,15 +444,76 @@ Esta clase hereda de `RepoSegurosMem`, pero se encarga también de guardar los d
 ### **4. `service` (Lógica de Negocio)**
 Aquí se implementan las **operaciones principales** que la interfaz de usuario ejecutará.
 
+**¿POR QUÉ ES BUENA IDEA MANTENER `app` SEPARADO DE `service`?**
+
+   - El paquete `service` **contiene clases reutilizables que gestionan el dominio**: contratar, eliminar, buscar... Ej: GestorUsuarios, GestorSeguros.
+   
+   - El paquete `app` contiene **clases que dirigen el flujo de la aplicación, pero que no encapsulan lógica de negocio pura**. Ej: GestorMenu, ControlAcceso.
+
+Esto sigue la idea de que la capa de aplicación *(application layer)* es la que usa los servicios del dominio *(domain layer)* para orquestar procesos completos.
+
+Esta estructura se parece mucho a una separación tipo **Clean Architecture**, donde se estructura un proyecto de forma clara, separando **responsabilidades** y facilitando el mantenimiento y evolución del sistema.
+
+Aquí se muestra una tabla donde se explica cada paquete y su **equivalencia técnica en una arquitectura por capas** o limpia:
+
+| **Paquete** | **Responsabilidad**                                                                 | **Equivalencia técnica / capa**         |
+|-------------|--------------------------------------------------------------------------------------|------------------------------------------|
+| `model`     | Define las **entidades del dominio** (como `Usuario`, `Seguro`, enums, etc.).       | **Capa de Dominio (Domain)**             |
+| `data`      | Implementa el acceso a datos, ya sea en memoria o desde ficheros.                   | **Capa de Infraestructura (Infrastructure)** |
+| `service`   | Contiene la lógica de negocio y casos de uso: gestionar seguros y usuarios.         | **Capa de Aplicación (Use Cases)**       |
+| `ui`        | Se encarga de la interacción con el usuario (por consola en este caso).             | **Capa de Presentación (User Interface)** |
+| `utils`     | Funcionalidades transversales: ficheros, seguridad, validaciones, etc.              | **Utilidades transversales (Cross-cutting concerns)** |
+| `app`       | Orquesta el flujo general de la aplicación: menú principal, control de acceso, etc. | **Capa de Arranque / Control de flujo (Application Layer)** |
+
 #### **Interfaces (`IServUsuarios`, `IServSeguros`)**
 
 ```kotlin
-interface IServSeguros {
+interface IServUsuarios {
+    fun iniciarSesion(nombre: String, clave: String): Perfil?
+    fun agregarUsuario(nombre: String, clave: String, perfil: Perfil): Boolean
+    fun eliminarUsuario(nombre: String): Boolean
+    fun cambiarClave(usuario: Usuario, nuevaClave: String): Boolean
+    fun buscarUsuario(nombre: String): Usuario?
+    fun consultarTodos(): List<Usuario>
+    fun consultarPorPerfil(perfil: Perfil): List<Usuario>
 }
 ```
 
 ```kotlin
-interface IServUsuarios {
+interface IServSeguros {
+    fun contratarSeguroHogar(
+        dniTitular: String,
+        importe: Double,
+        metrosCuadrados: Int,
+        valorContenido: Double,
+        direccion: String,
+        anioConstruccion: Int
+    ): Boolean
+
+    fun contratarSeguroAuto(
+        dniTitular: String,
+        importe: Double,
+        descripcion: String,
+        combustible: String,
+        tipoAuto: Auto,
+        cobertura: Cobertura,
+        asistenciaCarretera: Boolean,
+        numPartes: Int
+    ): Boolean
+
+    fun contratarSeguroVida(
+        dniTitular: String,
+        importe: Double,
+        fechaNacimiento: LocalDate,
+        nivelRiesgo: Riesgo,
+        indemnizacion: Double
+    ): Boolean
+
+    fun eliminarSeguro(numPoliza: Int): Boolean
+
+    fun consultarTodos(): List<Seguro>
+
+    fun consultarPorTipo(tipoSeguro: String): List<Seguro>
 }
 ```
 
@@ -458,20 +522,192 @@ interface IServUsuarios {
 - `GestorUsuarios` maneja la autenticación, creación de nuevos usuarios y cambios de contraseña.
 - `GestorSeguros` se encarga de contratar, listar y eliminar seguros.
 
-##### **GestorUsuarios:**
+##### `GestorUsuarios`  
+Esta clase implementa las interfaces `IServUsuarios` y `IUtilSeguridad`. Representa el **servicio de gestión de usuarios**. Actúa como **puente entre la lógica de negocio y el repositorio**, y aplica reglas adicionales como encriptar la contraseña.
 
-##### **GestorSeguros:**
+- **¿Qué hace?**  
+  Gestiona la lógica de usuarios: alta, baja, cambio de contraseña, autenticación y consultas.
+
+- **¿Cuándo se usa?**  
+  Cada vez que se desea trabajar con usuarios desde el menú principal u otras partes del sistema.
+
+- **¿Con qué se conecta?**  
+  - Con `IRepoUsuarios` para acceder o modificar la lista o fichero de usuarios.  
+  - Con `IUtilSeguridad` para encriptar y verificar contraseñas.
+
+- **¿Qué debes implementar?**
+
+   * `iniciarSesion(nombre: String, clave: String): Perfil?`  
+     Busca el usuario y verifica que la contraseña introducida sea válida. Si todo está correcto, devuelve el perfil del usuario. Si no, devuelve `null`.
+
+   * `agregarUsuario(nombre: String, clave: String, perfil: Perfil): Boolean`  
+     Encripta la clave y crea un nuevo objeto `Usuario`. Luego lo intenta añadir al repositorio.  
+     Se debe comprobar que el nombre de usuario no esté ya ocupado (esto lo hace el repositorio).
+
+   * `eliminarUsuario(nombre: String): Boolean`  
+     Busca el usuario por su nombre y, si existe, lo elimina usando el repositorio.
+
+   * `cambiarClave(usuario: Usuario, nuevaClave: String): Boolean`  
+     Encripta la nueva clave y actualiza la contraseña del usuario. Usa el método del repositorio para que se persista si es necesario.
+
+   * `buscarUsuario(nombre: String): Usuario?`  
+     Devuelve el usuario con ese nombre, si existe.
+
+   * `consultarTodos(): List<Usuario>`  
+     Devuelve todos los usuarios registrados (útil para administradores).
+
+   * `consultarPorPerfil(perfil: Perfil): List<Usuario>`  
+     Devuelve la lista de usuarios cuyo perfil coincida con el solicitado.
+
+##### `GestorSeguros`  
+Esta clase implementa la interfaz `IServSeguros` y representa el **servicio que permite gestionar los seguros**.
+
+- **¿Qué hace?**  
+  Se encarga de **crear (contratar)** los seguros, eliminarlos o consultarlos. Aísla al `Main` o `GestorMenu` de tener que preocuparse por cómo se guardan o gestionan.
+
+- **¿Cuándo se usa?**  
+  Cuando se contrata un seguro, se desea eliminarlo, o consultar los ya existentes.
+
+- **¿Con qué se conecta?**  
+  - Con `IRepoSeguros`, que almacena los seguros ya sea en memoria o en fichero.
+  - Con las clases `SeguroHogar`, `SeguroAuto` y `SeguroVida`, que se instancian directamente dentro del servicio.
+
+- **¿Qué debes implementar?**
+
+   * `contratarSeguroHogar(...)`  
+     Recibe todos los datos necesarios, instancia `SeguroHogar` mediante su constructor público (que generará automáticamente `numPoliza`), y lo guarda usando el repositorio.
+
+   * `contratarSeguroAuto(...)`  
+     Igual que el anterior, pero para crear un objeto `SeguroAuto`.
+
+   * `contratarSeguroVida(...)`  
+     Igual que el anterior, pero para crear un objeto `SeguroVida`.
+
+   * `eliminarSeguro(numPoliza: Int): Boolean`  
+     Elimina un seguro usando su número de póliza. No necesitas buscarlo previamente.
+
+   * `consultarTodos(): List<Seguro>`  
+     Devuelve todos los seguros registrados, sin importar el tipo.
+
+   * `consultarPorTipo(tipoSeguro: String): List<Seguro>`  
+     Filtra los seguros por tipo (`"SeguroAuto"`, `"SeguroVida"`, `"SeguroHogar"`) usando el método `tipoSeguro()` de cada clase.
 
 ---
 
 ### **5. `ui` (Interfaz de Usuario)**
 Este paquete maneja **cómo interactúa el usuario** con el sistema.
 
-#### **Interfaz `IUserInterface`**
+#### **Interfaz `IEntradaSalida`**
 - Define métodos como `mostrar(mensaje: String)`, etc.
 
+```kotlin
+interface IEntradaSalida {
+    fun mostrar(msj: String, salto: Boolean = true, pausa: Boolean = false)
+    fun mostrarError(msj: String, pausa: Boolean = true)
+    fun pedirInfo(msj: String = ""): String
+    fun pedirInfo(msj: String, error: String, debeCumplir: (String) -> Boolean): String
+    fun pedirDouble(prompt: String, error: String, errorConv: String, debeCumplir: (Double) -> Boolean): Double
+    fun pedirEntero(prompt: String, error: String, errorConv: String, debeCumplir: (Int) -> Boolean): Int
+    fun pedirInfoOculta(prompt: String): String
+    fun pausar(msj: String = "Pulse Enter para Continuar...")
+    fun limpiarPantalla(numSaltos: Int = 20)
+    fun preguntar(mensaje: String): Boolean
+}
+```
+
 #### **`Consola`** (Implementación de `IUserInterface`)
-- Imprime mensajes en la terminal y recibe entradas del usuario.
+Esta clase implementa la interfaz `IEntradaSalida` y se encarga de gestionar toda la **interacción con el usuario a través de la consola**. Permite mostrar mensajes, solicitar datos, validar entradas y simular la limpieza de la pantalla.
+
+- **¿Qué hace?**  
+  Centraliza todas las funciones de entrada y salida (E/S) del programa, de forma que se puedan reutilizar desde cualquier parte del código.
+
+- **¿Cuándo se usa?**  
+  Siempre que necesites mostrar información, pedir datos o limpiar la pantalla. Toda interacción con el usuario pasa por esta clase.
+
+- **¿Con qué se conecta?**  
+  - Se usa directamente desde `GestorMenu`, `ControlAcceso` y otras clases de la capa de aplicación.
+  - Usa la librería `JLine` para ocultar las contraseñas si es posible. En las dependencias del fichero `build.gradle.kts` debéis incluir `implementation("org.jline:jline:3.29.0")`.
+  - De todas formas, yo lo he probado y no funciona si ejecutamos dentro del IDE, pero probaremos a crear un JAR y ejecutarlo directamente en la terminal.
+
+- **¿Qué debes implementar?**
+
+#### `mostrar(msj: String, salto: Boolean = true, pausa: Boolean = false)`
+   Muestra el mensaje por consola. Si `salto` es `true`, añade un salto de línea. Si `pausa` es `true`, espera a que el usuario pulse Enter.
+
+#### `mostrarError(msj: String, pausa: Boolean = false)`
+   Muestra el mensaje como un error anteponiendo `"ERROR - "`. Si ya empieza así, no lo repite.
+
+#### `pedirInfo(msj: String): String`
+   Muestra un mensaje (si no está vacío) y devuelve el texto introducido por el usuario. Elimina espacios en blanco con `.trim()`.
+
+#### `pedirInfo(msj: String, error: String, debeCumplir: (String) -> Boolean): String`
+   Sobrecarga de pedirInfo, que solicita una entrada al usuario y lanza un `require` si no cumple una condición personalizada (debeCumplir) con el mensaje `error`.
+
+#### `pedirDouble(prompt: String, error: String, errorConv: String, debeCumplir: (Double) -> Boolean): Double`
+   1. Pide un número decimal al usuario (toDoubleOrNull). Reemplaza `,` por `.` para mayor flexibilidad.
+   2. Lanza un `require` si la conversión a doble no se puedo realizar correctamente con el mensaje `errorConv`.
+   3. Lanza un `require` si no cumple una condición personalizada (debeCumplir) con el mensaje `error`.
+   
+#### `pedirEntero(prompt: String, error: String, errorConv: String, debeCumplir: (Int) -> Boolean): Int`
+   Igual que el anterior, pero para un valor numérico entero.
+
+#### `pedirInfoOculta(prompt)`
+   Solicita un texto sin mostrarlo por pantalla, ideal para contraseñas.  
+   - Usa `JLine` si se puede.  
+   - Captura errores como Ctrl+C (`UserInterruptException`) y Ctrl+D (`EndOfFileException`).
+   - Os lo doy yo, pero dentro del IDE no funciona... veremos si funciona en la terminal.
+
+   ```kotlin
+    override fun pedirInfoOculta(prompt: String): String {
+        return try {
+            val terminal = TerminalBuilder.builder()
+                .dumb(true) // Para entornos no interactivos como IDEs
+                .build()
+
+            val reader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .build()
+
+            reader.readLine(prompt, '*') // Oculta la contraseña con '*'
+        } catch (e: UserInterruptException) {
+            mostrarError("Entrada cancelada por el usuario (Ctrl + C).", pausa = false)
+            ""
+        } catch (e: EndOfFileException) {
+            mostrarError("Se alcanzó el final del archivo (EOF ó Ctrl+D).", pausa = false)
+            ""
+        } catch (e: Exception) {
+            mostrarError("Problema al leer la contraseña: ${e.message}", pausa = false)
+            ""
+        }
+    }
+   ```
+
+#### `pausar(msj: String)`
+   Pide al usuario que pulse Enter para continuar. Sirve como pausa entre operaciones. Utiliza `pedirInfo`.
+
+#### `limpiarPantalla(numSaltos: Int = 20)`
+   Limpia la consola.  
+   - Si el programa se ejecuta desde una terminal real (`System.console()` no es `null`), usa códigos ANSI.  
+   - Si está en un entorno como un IDE, imprime saltos de línea.
+   - También os lo doy yo para que no busquéis.
+
+   ```kotlin
+    override fun limpiarPantalla(numSaltos: Int) {
+        if (System.console() != null) {
+            mostrar("\u001b[H\u001b[2J", false)
+            System.out.flush()
+        } else {
+            repeat(numSaltos) {
+                mostrar("")
+            }
+        }
+    }
+   ```
+
+#### `preguntar(mensaje: String): Boolean`
+   Pide al usuario una confirmación de tipo `sí / no`.  
+   - Espera `s` o `n` (minúscula).  
+   - Repite la pregunta si el usuario responde otra cosa.
 
 ---
 
@@ -558,7 +794,13 @@ class Seguridad : IUtilSeguridad {
 
 ---
 
-### **7. `Main.kt` (Punto de Entrada)**
+### **7. `app` (Flujo de la aplicación)**
+
+
+
+---
+
+### **8. `Main.kt` (Punto de Entrada)**
 - Inicializa repositorios y servicios.
 - Pide credenciales o permite crear un `ADMIN` si no hay usuarios.
 - Carga el **menú principal** para gestionar usuarios y seguros.
