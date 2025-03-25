@@ -156,17 +156,21 @@ Los usuarios verán opciones según su perfil.
     1. Nuevo
     2. Eliminar
     3. Cambiar contraseña
+    4. Consultar
+    5. Volver
 2. Seguros
     1. Contratar
         1. Hogar
         2. Auto
         3. Vida
+        4. Volver
     2. Eliminar
     3. Consultar
         1. Todos
         2. Hogar
         3. Auto
         4. Vida
+        5. Volver
 3. Salir
 ```
 
@@ -177,12 +181,14 @@ Los usuarios verán opciones según su perfil.
         1. Hogar
         2. Auto
         3. Vida
+        4. Volver
     2. Eliminar
     3. Consultar
         1. Todos
         2. Hogar
         3. Auto
         4. Vida
+        5. Volver
 2. Salir
 ```
 
@@ -194,6 +200,7 @@ Los usuarios verán opciones según su perfil.
         2. Hogar
         3. Auto
         4. Vida
+        5. Volver
 2. Salir
 ```
 
