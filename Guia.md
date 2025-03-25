@@ -831,6 +831,64 @@ Además, un método por cada una de las opciones del menú, por ejemplo:
    - `eliminarSeguro()`
    ...
 
+#### **Menús y Permisos**
+
+Los usuarios verán opciones según su perfil.
+
+📌 Menú de admin
+```
+1. Usuarios
+    1. Nuevo
+    2. Eliminar
+    3. Cambiar contraseña
+    4. Consultar
+    5. Volver
+2. Seguros
+    1. Contratar
+        1. Hogar
+        2. Auto
+        3. Vida
+        4. Volver
+    2. Eliminar
+    3. Consultar
+        1. Todos
+        2. Hogar
+        3. Auto
+        4. Vida
+        5. Volver
+3. Salir
+```
+
+📌 Menú de gestión (Accede a todos los seguros pero no puede gestionar usuarios)
+```
+1. Seguros
+    1. Contratar
+        1. Hogar
+        2. Auto
+        3. Vida
+        4. Volver
+    2. Eliminar
+    3. Consultar
+        1. Todos
+        2. Hogar
+        3. Auto
+        4. Vida
+        5. Volver
+2. Salir
+```
+
+📌 Menú de consulta (Accede solo a la consulta de seguros)
+```
+1. Seguros
+    1. Consultar
+        1. Todos
+        2. Hogar
+        3. Auto
+        4. Vida
+        5. Volver
+2. Salir
+```
+
 ---
 
 ### **8. `Main.kt` (Punto de Entrada)**
