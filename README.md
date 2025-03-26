@@ -2,7 +2,7 @@
 
 **Práctica: Gestión de Seguros con Ficheros TXT**
 
-## [Guía de Implementación Paso a Paso](Guia.md) ***(Última actualización 20/03/2025 20:15)***
+## [Guía de Implementación Paso a Paso](Guia.md) ***(Última actualización 26/03/2025 22:30)***
 
 ## 1. Introducción
 
@@ -41,83 +41,22 @@ id;dniTitular;numPoliza;importe;[datos específicos];tipoSeguro
 Ejemplo de Seguro de Hogar:
 
 ```
-100001;12345678A;500.0;80;150000;Calle Mayor, 12;SeguroHogar
+100000;12345678A;50.0;80;150000;Calle Mayor, 12;1998;SeguroHogar
 ```
 
 Ejemplo de Seguro de Auto:
 
 ```
-400001;98765432B;700.0;"Toyota Corolla Azul";Gasolina;Turismo;Todo Riesgo;true;1;SeguroAuto
+400002;77777777T;11.0;Hyndai i10;Galosina;COCHE;TODO_RIESGO;true;0;SeguroAuto
 ```
 
 Ejemplo de Seguro de Vida:
 
 ```
-800001;87654321C;300.0;1985-05-12;Medio;100000;SeguroVida
+800001;44000998F;54.0;01/09/2000;BAJO;200000.0;SeguroVida
 ```
 
-## 3. Jerarquía de Clases
-
-La aplicación sigue una estructura basada en herencia, asegurando una organización clara y extensible.
-
-📌 Clases Principales
-
-1. Seguro (Base de todos los seguros, no se puede instanciar)
-2. SeguroHogar
-3. SeguroAuto
-4. SeguroVida
-
-📌 Propiedades y Métodos
-
-- Clase Seguro (Abstracta)
-    * `numPoliza`: Int
-    * `dniTitular`: String
-    * `importe`: Double (privado)
-    * Métodos abstractos:
-        - `calcularImporteAnioSiguiente(interes: Double): Double`
-        - `tipoSeguro(): String`
-        - `serializar(): String` (Convierte el objeto a formato TXT)
-
-- Clase SeguroHogar
-    * `metrosCuadrados`: Int
-    * `valorContenido`: Double
-    * `direccion`: String
-    * `calcularImporteAnioSiguiente(interes: Double)`: Double (Aplica el porcentaje proporcionado al importe para generar la predicción del importe del siguiente año).
-
-Ejemplo de serializar():
-
-```
-100001;12345678A;500.0;80;150000;Calle Mayor, 12;SeguroHogar
-```
-
-- Clase SeguroAuto
-    * `descripcion`: String (Ejemplo: "Toyota Corolla Azul")
-    * `combustible`: String (Gasolina, Diésel, Eléctrico, Híbrido)
-    * `tipoAuto`: Enumerado (Coche, Moto, Camion)
-    * `tipoCobertura`: String (Terceros, Todo Riesgo, etc.)
-    * `asistenciaCarretera`: Boolean
-    * `numPartes`: Int
-    * `calcularImporteAnioSiguiente(interes: Double)`: Aumenta un 2% por cada parte el interés pasado como argumento, si hubo partes, sino solo usa el interés dado.
-
-Ejemplo de serializar():
-
-```
-400001;98765432B;700.0;"Toyota Corolla Azul";Gasolina;Turismo;Todo Riesgo;true;1;SeguroAuto
-```
-
-- Clase SeguroVida
-    * `fechaNac`: String
-    * `nivelRiesgo`: Enumerado (Bajo, Medio, Alto)
-    * `indemnizacion`: Double
-    * `calcularImporteAnioSiguiente(interes: Double)`: Aumenta según el nivel de riesgo (Bajo 2%, Medio 5%, Alto 10%).
-
-Ejemplo de serializar():
-
-```
-800001;87654321C;300.0;1985-05-12;Medio;100000;SeguroVida
-```
-
-## 4. Generación del id de los seguros
+## 3. Generación del id de los seguros
 
 Los ids de los seguros se generarán automáticamente:
 
@@ -125,28 +64,7 @@ Los ids de los seguros se generarán automáticamente:
 - Seguros de Auto → desde 400000.
 - Seguros de Vida → desde 800000.
 
-## 5. Validación de Datos
-
-- Cada campo será validado antes de continuar.
-- Métodos estáticos en Seguro y Alquiler manejarán las validaciones.
-
-Ejemplo:
-
-```
-class Seguro {
-    companion object {
-        fun validarDni(dni: String): Boolean {
-            return dni.matches(Regex("^[0-9]{8}[A-Z]$"))
-        }
-    }
-}
-```
-
-Si el usuario ingresa un dato incorrecto:
-
-DNI inválido. Inténtelo nuevamente o escriba "CANCELAR" para salir.
-
-## 6. Menús y Permisos
+## 4. Menús y Permisos
 
 Los usuarios verán opciones según su perfil.
 
@@ -174,7 +92,7 @@ Los usuarios verán opciones según su perfil.
 3. Salir
 ```
 
-📌 Menú de gestión (Accede a todos los seguros pero no puede gestionar usuarios)
+📌 Menú de gestión *(Accede a todos los seguros, pero no puede gestionar usuarios)*
 ```
 1. Seguros
     1. Contratar
@@ -192,7 +110,7 @@ Los usuarios verán opciones según su perfil.
 2. Salir
 ```
 
-📌 Menú de consulta (Accede solo a la consulta de seguros)
+📌 Menú de consulta *(Accede solo a la consulta de seguros)*
 ```
 1. Seguros
     1. Consultar
@@ -204,95 +122,22 @@ Los usuarios verán opciones según su perfil.
 2. Salir
 ```
 
-## 7. Modo de Ejecución
+## 5. Modo de Ejecución
 
-Al iniciar, después de validar al usuario, se realiza la pregunta:
+- Al iniciar el programa, se realiza la pregunta:
 
-```
-Seleccione el modo de ejecución:
-1. SIMULACIÓN (solo en memoria)
-2. ALMACENAMIENTO (usar ficheros)
-```
+   - **¿Deseas iniciar en modo SIMULACIÓN (sin guardar datos)?**
 
-* SIMULACIÓN: Todos los datos se manejan en memoria.
-* ALMACENAMIENTO: Se guardan y cargan desde Seguros.txt.
+   - Dependiendo de la respuesta (s/n):
+      * SIMULACIÓN: Todos los datos se manejan en memoria.
+      * ALMACENAMIENTO: Se guardan y cargan desde Seguros.txt.
 
-## 8. Mapa de Creación de Seguros
+- A continuación, el programa deberá comprobar si existen usuarios registrados en la app *(fichero Usuarios.txt)*.
 
-El mapa de funciones se usará para instanciar dinámicamente los seguros cuando se carguen desde el fichero Seguros.txt.
+- En caso de que no existan *(no existe el fichero o el fichero está vacío)* preguntará si desea crear un usuario administrador:
+   - Si responde negativamente, la aplicación finalizará.
+   - Si responde positivamente, se pedirá los datos para crear el usuario con perfil `ADMIN`.
 
-```kotlin
-val mapaSeguros: Map<String, (List<String>) -> Seguro> = mapOf(
-    "SeguroHogar" to { datos ->
-        SeguroHogar(
-            datos[0].toInt(), datos[1], datos[2].toInt(), datos[3].toDouble(),
-            datos[4].toInt(), datos[5].toDouble(), datos[6]
-        )
-    },
-    "SeguroAuto" to { datos ->
-        SeguroAuto(
-            datos[0].toInt(), datos[1], datos[2].toInt(), datos[3].toDouble(),
-            datos[4], datos[5], datos[6], datos[7], datos[8].toBoolean(), datos[9].toInt()
-        )
-    },
-    "SeguroVida" to { datos ->
-        SeguroVida(
-            datos[0].toInt(), datos[1], datos[2].toInt(), datos[3].toDouble(),
-            datos[4], datos[5], datos[6].toDouble()
-        )
-    }
-)
-```
+- El paso siguiente será solicitar el login o inicio de sesión *(nombre de usuario y contraseña)*.
 
-## 9. RepositorioSegurosFicheros (Lectura y Escritura de Seguros en Fichero)
-
-```kotlin
-class RepositorioSegurosFicheros(private val archivo: String, private val mapaSeguros: Map<String, (List<String>) -> Seguro>) {
-
-    // Guardar un seguro en el fichero
-    fun guardarSeguro(seguro: Seguro) {
-        File(archivo).appendText(seguro.serializar() + "\n")
-    }
-
-    // Cargar todos los seguros del fichero
-    fun cargarSeguros(): List<Seguro> {
-        val seguros = mutableListOf<Seguro>()
-        val file = File(archivo)
-
-        if (!file.exists()) return seguros
-
-        file.forEachLine { linea ->
-            val datos = linea.split(";")
-            val tipoSeguro = datos.last() // El último campo indica el tipo de seguro
-
-            val seguro = mapaSeguros[tipoSeguro]?.invoke(datos.dropLast(1)) // Pasamos la lista de datos SIN el tipoSeguro
-            if (seguro != null) {
-                seguros.add(seguro)
-            }
-        }
-        return seguros
-    }
-}
-```
-
-
-## 10. main() con inicialización del repositorio
-
-```
-fun main() {
-    val archivo = "Seguros.txt"
-    val repo = RepositorioSegurosFicheros(archivo, mapaSeguros)
-
-    // Crear seguros y guardarlos
-    val seguroHogar = SeguroHogar(1, "12345678A", 101, 500.0, 80, 150000.0, "Calle Mayor, 12")
-    val seguroAuto = SeguroAuto(2, "98765432B", 102, 700.0, "Toyota Corolla Azul", "Gasolina", "Turismo", "Todo Riesgo", true, 1)
-
-    repo.guardarSeguro(seguroHogar)
-    repo.guardarSeguro(seguroAuto)
-
-    // Cargar seguros desde el fichero
-    val segurosCargados = repo.cargarSeguros()
-    segurosCargados.forEach { println(it.tipoSeguro() + ": " + it.serializar()) }
-}
-```
-
+- Por último, si ha seleccionado el modo de ejecucuón de `ALMACENAMIENTO` deberá cargar los datos que existen de los ficheros `Usuarios.txt` y `Seguros.txt`.
