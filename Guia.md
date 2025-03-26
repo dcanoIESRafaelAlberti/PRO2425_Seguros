@@ -18,6 +18,8 @@ Cuando tenga otro rato, terminaré mi versión y os subiré el resto de apartado
 
 ***NOTA (25/03/2025 12:15)*** - Actualizados los apartados 7 y 8 (app y Main).
 
+***NOTA (26/03/2025 22:30)*** - Modificación en las clase `Seguro` y las clases que la extienden *(el método tipoSeguro se resuelve solo en la clase Seguro)*. Actualización del apartado 7 para incluir una nueva clase `CargadorInicial`. **De todas formas este paquete y el Main lo vamos a trabajar en clase la semana próxima.**
+
 ---
 
 Aquí tenéis un desglose del proyecto con **indicaciones detalladas** sobre qué debe hacer cada paquete y cómo implementar cada clase.
@@ -104,13 +106,15 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 - **Métodos abstractos:**
   - `calcularImporteAnioSiguiente(interes: Double): Double`
-  - `tipoSeguro(): String`
 
 - **Métodos que sobreescribe:**
   - `serializar(): String`: Retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;` *(por ejemplo: "100001;44027777K;327.40")*
   - `toString(): String`: Retornar la información del seguro con el siguiente formato *"Seguro(numPoliza=100001, dniTitular=44027777K, importe=327.40)"*. El `importe`siempre con dos posiciones decimales.
   - `hashCode(): Int`: Cómo `numPoliza`será único por cada seguro, retornar el valor de hashCode de un seguro en base solo a la dicha propiedad *(sin utilizar ningún número primo, ni más propiedades)*.
   - `equals(other: Any?): Boolean`: Utilizad igual que en el anterior método, solo la propiedad `numPoliza` para su comparación *(por supuesto, hacedlo bien, antes debéis realizar la comparación por referencia y verificar también si se trata de un `Seguro`)*
+
+- **Métodos implementados:**
+  - `tipoSeguro(): String`: Retornar el nombre de la clase usando `this::class.simpleName` y el operador elvis para indicar al compilador que si `simpleName` es `null` *(cosa que nunca debe pasar, ya que la clase tiene un nombre)*, entonces deberá retornar el valor "Desconocido".
 
 ##### **CLASES QUE HEREDAN DE `Seguro`**
 
@@ -129,7 +133,6 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 - **Métodos que sobreescribe:**
   - `calcularImporteAnioSiguiente()`: Retornar el importe del año siguiente basándose en el interés que se pasa por parámetro, sumándole un interés residual de 0.02% por cada 5 años de antiguedad del hogar *(Ej: 4.77 años de antiguedad no incrementa, pero 23,07 sumará al interés el valor de 4 x 0.02 = 0.08)*.
-  - `tipoSeguro(): String`: Retornar el nombre de la clase usando `this::class.simpleName` y el operador elvis para indicar al compilador que si `simpleName` es `null` *(cosa que nunca debe pasar, ya que la clase tiene un nombre)*, entonces deberá retornar el valor "Desconocido".
   - `serializar(): String`: Modificar el comportamiento de este método heredado, para retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;`.
   - `toString(): String`: Retornar la información del seguro de hogar con el siguiente formato *"Seguro Hogar(numPoliza=100001, dniTitular=44027777K, importe=327.40, ...)"*. ¿Cómo lo podéis hacer si no tenéis accesible los atributos de la clase base `numPoliza` y `dniTitular`?
 
@@ -148,7 +151,6 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 - **Métodos que sobreescribe:**
   - `calcularImporteAnioSiguiente()`: Retornar el importe del año siguiente basándose en el interés que se pasa por parámetro, sumándole un interés residual del 2% por cada parte declarado.
-  - `tipoSeguro(): String`: Retornar el nombre de la clase usando `this::class.simpleName` y el operador elvis para indicar al compilador que si `simpleName` es `null`, entonces deberá retornar el valor "Desconocido".
   - `serializar(): String`: Modificar el comportamiento de este método heredado, para retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;`.
   - `toString(): String`: Retornar la información del seguro de auto con un formato similar al del seguro de hogar.
 
@@ -166,7 +168,6 @@ Este paquete contiene **todas las clases y enumeraciones** que definen los datos
 
 - **Métodos que sobreescribe:**
   - `calcularImporteAnioSiguiente()`: Retornar el importe del año siguiente basándose en el interés que se pasa por parámetro, sumándole un interés residual del 0.05% por cada año cumplido y el interés de su nivel de riesgo *(Ver clase enumerada `Riesgo`)*.
-  - `tipoSeguro(): String`: Retornar el nombre de la clase usando `this::class.simpleName` y el operador elvis para indicar al compilador que si `simpleName` es `null`, entonces deberá retornar el valor "Desconocido".
   - `serializar(): String`: Modificar el comportamiento de este método heredado, para retornar una cadena de caracteres con los valores de los atributos de la clase separados por `;`.
   - `toString(): String`: Retornar la información del seguro de auto con un formato similar al del seguro de hogar.
 
@@ -722,7 +723,6 @@ Contiene herramientas para operaciones repetitivas.
 ```kotlin
 interface IUtilFicheros {
     fun leerArchivo(ruta: String): List<String>
-    fun leerSeguros(ruta: String, mapaSeguros: Map<String, (List<String>) -> Seguro>): List<Seguro>
     fun agregarLinea(ruta: String, linea: String): Boolean
     fun <T: IExportable> escribirArchivo(ruta: String, elementos: List<T>): Boolean
     fun existeFichero(ruta: String): Boolean
@@ -731,7 +731,59 @@ interface IUtilFicheros {
 ```
 
 #### **Clase `Ficheros`**
-- Implementa `IUtilFicheros` y maneja el acceso a los `.txt`.
+Esta clase será la **encargada de leer y escribir información en ficheros de texto**, por tanto, **forma parte de la capa de utilidades** del sistema.
+
+   - Implementa la interfaz `IUtilFicheros`, la cual define todas las operaciones necesarias para trabajar con archivos del sistema.
+   - Permite que cualquier otra clase (por ejemplo, repositorios) pueda **leer, guardar o actualizar archivos** sin tener que preocuparse por los detalles de bajo nivel de E/S.
+   - Se asegura de **mostrar mensajes de error claros** si algo falla al acceder a los ficheros.
+
+##### ¿Qué relación tiene con otras clases?
+
+- Se inyecta (según el principio **DIP**) en clases como `RepoUsuariosFich` o `RepoSegurosFich`, que son los repositorios encargados de almacenar datos en ficheros.
+- También necesita una instancia de la interfaz `IEntradaSalida` para poder **mostrar mensajes de error** al usuario si ocurre algún problema.
+
+**Ejemplo de uso** *(a nivel conceptual)*:
+```kotlin
+val ficheros = FicherosTexto(ui)
+val repoUsuarios = RepoUsuariosFich("res/Usuarios.txt", ficheros)
+```
+
+##### **Constructor con Inyección DIP**
+
+- El constructor debe recibir una instancia de `IEntradaSalida`, que se usará para mostrar errores.
+- Es importante seguir este patrón para **no acoplar** la clase a una consola específica.
+
+##### **Método `leerArchivo(ruta: String): List<String>`**
+
+- Lee todas las líneas de un archivo de texto y las devuelve como una lista de cadenas.
+- Si el archivo **no existe** o **hay errores de lectura**, debe devolver una lista vacía y mostrar un mensaje de error.
+
+##### **Método `agregarLinea(ruta: String, linea: String): Boolean`**
+
+- Añade una línea al final del archivo.
+- Si no existe, **lo crea automáticamente**.
+- Debe añadir un salto de línea `\n` al final de la cadena.
+- Si ocurre un error, devuelve `false` y muestra el mensaje correspondiente.
+
+##### **Método `escribirArchivo(ruta: String, elementos: List<T>): Boolean`**
+
+- Recibe una lista de objetos que implementan la interfaz `IExportable` y **escribe sus representaciones serializadas** en un archivo, **sobrescribiendo su contenido anterior**.
+- Utiliza un separador como `;` en cada línea (aunque esto lo hace cada objeto en su función `serializar()`).
+- Si ocurre un error, también debe devolver `false`.
+
+##### **Método `existeFichero(ruta: String): Boolean`**
+
+- Comprueba si un archivo concreto **existe** en la ruta proporcionada.
+
+##### **Método `existeDirectorio(ruta: String): Boolean`**
+
+- Comprueba si una ruta corresponde a un **directorio existente**.
+
+
+##### Consejos de implementación
+
+- Usar la clase `File` de Kotlin (`java.io.File`) para gestionar todos los ficheros.
+- Usar `try-catch` para capturar excepciones como `IOException`.
 
 #### **Interfaz `IUtilSeguridad`**
 - Define métodos para encriptar y verificar claves.
@@ -745,7 +797,7 @@ interface IUtilSeguridad {
 
 #### **Clase `Seguridad`
 
-- Incluir la implementación de la librería externa BCrypt en el fichero `build.gradle`:
+- Incluir la implementación de la librería externa **BCrypt** en el fichero `build.gradle`:
 
 ```kotlin
 dependencies {
@@ -798,6 +850,8 @@ class Seguridad : IUtilSeguridad {
 
 ### **7. `app` (Flujo de la aplicación)**
 
+Esta capa y el Main lo vamos a trabajar la semana que viene en clase, pero os dejo algunos detalles de su posible implementación.
+
 #### **ControlAcceso**
 
 ***Es la clase responsable del control de acceso al sistema:***
@@ -810,6 +864,22 @@ Los atributos de esta clase *(constructor primario)* serían los siguientes:
    - Interfaz de usuario *(IEntradaSalida)*
    - Servicio que gestiona los usuarios *(IServUsuarios)*
    - Clase que agrupa los métodos para gestionar ficheros *(IUtilFicheros)*
+
+#### **CargadorInicial**
+Clase encargada de centralizar el proceso de carga inicial de información desde los ficheros de usuarios y seguros al arrancar la aplicación.
+
+Esta clase utiliza **inyección de dependencias (DIP)** al recibir instancias que implementan `ICargarUsuariosIniciales` y `ICargarSegurosIniciales`, por lo que **no está acoplada a ninguna implementación concreta de los repositorios**. Además, se apoya en la interfaz `IEntradaSalida` para mostrar errores si los datos no pueden cargarse.
+
+Podría tener los siguientes métodos:
+
+   - **`fun cargarInfo(repoUsuarios: ICargarUsuariosIniciales, repoSeguros: ICargarSegurosIniciales)`**
+   Método principal que orquesta la carga inicial de usuarios y seguros desde sus respectivos ficheros.
+
+   - **`private fun cargarUsuarios(repoUsuarios: ICargarUsuariosIniciales)`**
+   Intenta cargar los usuarios desde fichero. Si ocurre un error durante el proceso *(por ejemplo, datos mal formateados o error al leer el fichero)*, se captura la excepción y se informa al usuario mediante la interfaz `ui`.
+
+   - **`private fun cargarSeguros(repoSeguros: ICargarSegurosIniciales)`**
+   Intenta cargar los seguros desde fichero. Si ocurre un error durante el proceso *(por ejemplo, datos mal formateados o error al leer el fichero)*, se captura la excepción y se informa al usuario mediante la interfaz `ui`.
 
 #### **GestorMenu**
 
@@ -896,6 +966,4 @@ Los usuarios verán opciones según su perfil.
 - Pregunta si desea iniciar en modo SIMULACIÓN o ALMACENAMIENTO.
 - Pide credenciales o permite crear un `ADMIN` si no hay usuarios.
 - Carga el **menú principal** para gestionar usuarios y seguros.
-
-
 
