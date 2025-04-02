@@ -2,7 +2,9 @@
 
 **Práctica: Gestión de Seguros con Ficheros TXT**
 
-## [Guía de Implementación Paso a Paso](Guia.md) ***(Última actualización 26/03/2025 22:30)***
+## [Guía de Implementación Paso a Paso](GuiaImplementacion.md)
+
+## [Guía para compilar, empaquetar y ejecutar una app Kotlin con dependencias](GuiaJAR.md)
 
 ## 1. Introducción
 
